@@ -2,24 +2,48 @@ package tech.zeta.controller;
 
 import tech.zeta.model.User;
 import tech.zeta.service.AuthService;
+import tech.zeta.ui.AuthUI;
 
 import java.util.Scanner;
 
 public class AuthController {
-    private final AuthService authService = new AuthService();
+    private AuthService authService;
+    private AuthUI authUI;
+   // private DashboardController dashboardController;
+
+    public AuthController(AuthService authService, AuthUI authUI) {
+        this.authService = authService;
+        this.authUI = authUI;
+    }
 
     public void start() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter username: ");
-        String user = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String pass = scanner.nextLine();
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            authUI.showMenu();
+            int choice = sc.nextInt();
+            sc.nextLine(); // consume newline
 
-        User loggedInUser = authService.login(user, pass);
-        if (loggedInUser != null) {
-            System.out.println("Login successful! Welcome " + loggedInUser.getRole());
-        } else {
-            System.out.println("Invalid credentials!");
+            switch (choice) {
+                case 1 -> {
+                    String username = authUI.promptUsername();
+                    String password = authUI.promptPassword();
+                    if (authService.login(username, password)) {
+                        authUI.showMessage("Login successful!");
+                        DashboardController.showDashboard(authService);
+                    } else {
+                        authUI.showMessage("Invalid credentials!");
+                    }
+                }
+                case 2 -> {
+                    authService.logout();
+                    authUI.showMessage("Logged out successfully!");
+                }
+                case 3 -> {
+                    authUI.showMessage("Exiting...");
+                    return;
+                }
+                default -> authUI.showMessage("Invalid choice!");
+            }
         }
     }
 }

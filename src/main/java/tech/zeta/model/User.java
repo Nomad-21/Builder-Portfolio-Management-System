@@ -1,6 +1,6 @@
 package tech.zeta.model;
 
-import tech.zeta.util.Role;
+import tech.zeta.constants.Role;
 
 public class User {
 
@@ -10,11 +10,11 @@ public class User {
     private String password;
     private Role role;
 
-    public User(int userId, String name, String email, String password, Role role) {
+    public User(int userId, String name, String email,String password,Role role) {
         this.userId = userId;
         this.name = name;
-        this.email = email;
         this.password = password;
+        this.email = email;
         this.role = role;
     }
 

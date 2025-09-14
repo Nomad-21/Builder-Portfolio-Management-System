@@ -31,7 +31,8 @@ public class BuilderUI {
             System.out.println("3. Create Project");
             System.out.println("4. Upload Document");
             System.out.println("5. Verify Payments");
-            System.out.println("6. Exit");
+            System.out.println("6. View Gantt Chart");
+            System.out.println("7. Exit");
             System.out.print("Enter choice: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); // consume newline
@@ -42,11 +43,14 @@ public class BuilderUI {
                 case 3 -> createProjectFlow();
                 case 4 -> uploadDocumentFlow();
                 case 5 -> verifyPaymentsFlow();
-                case 6 -> { return; }
+                case 6 -> viewGanttChartFlow();
+                case 7 -> { return; }
                 default -> System.out.println("Invalid choice!");
             }
         }
     }
+
+
     private void createProjectFlow() {
         try {
             // 1. Collect Project Details
@@ -115,6 +119,25 @@ public class BuilderUI {
         int projectId = scanner.nextInt();
         scanner.nextLine();
 
+        while (true) {
+            System.out.println("\n--- Edit Project Menu ---");
+            System.out.println("1. Update Project Details");
+            System.out.println("2. Update Tasks");
+            System.out.println("3. Back to Builder Menu");
+            System.out.print("Enter choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1 -> updateProjectDetails(projectId);
+                case 2 -> updateTaskFlow(projectId);
+                case 3 -> { return; }
+                default -> System.out.println("Invalid choice!");
+            }
+        }
+    }
+
+    private void updateProjectDetails(int projectId) {
         System.out.println("Enter new details (leave blank to keep current value):");
 
         System.out.print("Project Name: ");
@@ -132,19 +155,121 @@ public class BuilderUI {
         System.out.print("End Date (YYYY-MM-DD): ");
         String endDateInput = scanner.nextLine();
 
-        System.out.print("Status (Upcoming/In Progress/Completed): ");
-        String status = scanner.nextLine();
-
         Project updatedProject = new Project();
+        updatedProject.setProjectId(projectId);
         if (!name.isBlank()) updatedProject.setName(name);
         if (!desc.isBlank()) updatedProject.setDescription(desc);
         if (!budgetInput.isBlank()) updatedProject.setBudget(Double.parseDouble(budgetInput));
         if (!startDateInput.isBlank()) updatedProject.setStartDate(LocalDate.parse(startDateInput));
         if (!endDateInput.isBlank()) updatedProject.setEndDate(LocalDate.parse(endDateInput));
-        if (!status.isBlank()) updatedProject.setStatus(ProjectStatus.valueOf(status));
 
-        builderController.editProject(projectId, updatedProject);
+        builderController.editProject(updatedProject);
     }
+
+    private void updateTaskFlow(int projectId) {
+        while (true) {
+            System.out.println("\n--- Task Update Menu ---");
+            System.out.println("1. Add Task");
+            System.out.println("2. Edit Task");
+            System.out.println("3. Remove Task");
+            System.out.println("4. Back");
+            System.out.print("Enter choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1 -> addTaskFlow(projectId);
+                case 2 -> editTaskFlow(projectId);
+                case 3 -> removeTaskFlow(projectId);
+                case 4 -> { return; }
+                default -> System.out.println("Invalid choice!");
+            }
+        }
+    }
+
+    private void addTaskFlow(int projectId) {
+        System.out.print("Task Name: ");
+        String taskName = scanner.nextLine();
+        System.out.print("Description: ");
+        String taskDesc = scanner.nextLine();
+        System.out.print("Start Date (YYYY-MM-DD): ");
+        LocalDate taskStart = LocalDate.parse(scanner.nextLine());
+        System.out.print("End Date (YYYY-MM-DD): ");
+        LocalDate taskEnd = LocalDate.parse(scanner.nextLine());
+
+        int progress = -1;
+        while (progress < 0 || progress > 100) {
+            System.out.print("Progress (0-100): ");
+            progress = scanner.nextInt();
+            scanner.nextLine();
+            if (progress < 0 || progress > 100) {
+                System.out.println("Invalid input! Progress must be between 0 and 100.");
+            }
+        }
+
+        Task task = new Task();
+        task.setName(taskName);
+        task.setDescription(taskDesc);
+        task.setStartDate(taskStart);
+        task.setEndDate(taskEnd);
+        task.setProgress(progress);
+        task.setProjectId(projectId);
+
+        builderController.createTask(task);
+    }
+
+    private void editTaskFlow(int projectId) {
+        System.out.print("Enter Task ID to edit: ");
+        int taskId = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.println("Enter new task details (leave blank to keep current):");
+        System.out.print("Task Name: ");
+        String name = scanner.nextLine();
+        System.out.print("Description: ");
+        String desc = scanner.nextLine();
+        System.out.print("Start Date (YYYY-MM-DD): ");
+        String startInput = scanner.nextLine();
+        System.out.print("End Date (YYYY-MM-DD): ");
+        String endInput = scanner.nextLine();
+
+        String progressInput;
+        int progress = -1;
+        while (true) {
+            System.out.print("Progress (0-100, leave blank to keep current): ");
+            progressInput = scanner.nextLine();
+            if (progressInput.isBlank()) break; // keep current
+            try {
+                progress = Integer.parseInt(progressInput);
+                if (progress < 0 || progress > 100) {
+                    System.out.println("Invalid input! Must be between 0 and 100.");
+                    continue;
+                }
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number! Please enter 0–100.");
+            }
+        }
+
+        Task updatedTask = new Task();
+        updatedTask.setTaskId(taskId);
+        if (!name.isBlank()) updatedTask.setName(name);
+        if (!desc.isBlank()) updatedTask.setDescription(desc);
+        if (!startInput.isBlank()) updatedTask.setStartDate(LocalDate.parse(startInput));
+        if (!endInput.isBlank()) updatedTask.setEndDate(LocalDate.parse(endInput));
+        if (progress != -1) updatedTask.setProgress(progress);
+
+        builderController.editTask(updatedTask);
+    }
+
+
+    private void removeTaskFlow(int projectId) {
+        System.out.print("Enter Task ID to remove: ");
+        int taskId = scanner.nextInt();
+        scanner.nextLine();
+        builderController.removeTask(taskId);
+    }
+
 
 
     private void uploadDocumentFlow() {
@@ -157,7 +282,7 @@ public class BuilderUI {
     }
 
     private void verifyPaymentsFlow() {
-        builderController.verifyPayments();
+        builderController.showPendingPayments();
         System.out.print("Enter Payment ID to Approve/Reject (0 to skip): ");
         int paymentId = scanner.nextInt();
         scanner.nextLine();
@@ -167,5 +292,12 @@ public class BuilderUI {
             if (action.equalsIgnoreCase("A")) builderController.approvePayment(paymentId);
             else if (action.equalsIgnoreCase("R")) builderController.rejectPayment(paymentId);
         }
+    }
+
+    private void viewGanttChartFlow() {
+        System.out.print("Enter Project ID to view Gantt Chart: ");
+        int projectId = scanner.nextInt();
+        scanner.nextLine();
+        builderController.viewGanttChart(projectId);
     }
 }

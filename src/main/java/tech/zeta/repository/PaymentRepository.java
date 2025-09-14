@@ -29,7 +29,7 @@ public class PaymentRepository {
     }
 
     // Read by ID
-    public <K,V> List<Payment> getPaymentBy(Param<K,V> param) {
+    public <K,V> List<Payment> getPaymentsBy(Param<K,V> param) {
         String sql = "SELECT * FROM Payment WHERE " + param.getKey() + "=?";
         List<Payment> payments = new ArrayList<>();
         try {Connection conn = DBUtil.getConnection();

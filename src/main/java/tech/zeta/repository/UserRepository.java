@@ -12,7 +12,7 @@ import java.util.List;
 public class UserRepository {
 
     // Create
-    public void addUser(User user) {
+    public boolean addUser(User user) {
         String sql = "INSERT INTO \"User\" (name, email, password, role) VALUES (?, ?, ?, ?)";
         try{Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -23,7 +23,9 @@ public class UserRepository {
             stmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Error adding user: " + e.getMessage());
+            return false;
         }
+        return true;
     }
 
     // Read

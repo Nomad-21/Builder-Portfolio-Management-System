@@ -2,6 +2,7 @@ package tech.zeta.repository;
 
 import tech.zeta.model.Document;
 import tech.zeta.util.DBUtil;
+import tech.zeta.util.Param;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -24,24 +25,26 @@ public class DocumentRepository {
     }
 
     // Read by ID
-    public Document getDocumentById(int documentId) {
-        String sql = "SELECT * FROM Document WHERE document_id=?";
+    public <K,V> List<Document> getDocumentsBy(Param<K,V> param) {
+        String sql = "SELECT * FROM Document WHERE "+param.getKey()+"=?";
+        List<Document> documents = new ArrayList<>();
         try {Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, documentId);
+            stmt.setObject(1, param.getValue());
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return new Document(
+            while (rs.next()) {
+                documents.add(new Document(
                         rs.getInt("document_id"),
                         rs.getString("file_path"),
                         rs.getTimestamp("upload_date").toLocalDateTime(),
                         rs.getInt("project_id")
+                    )
                 );
             }
         } catch (SQLException e) {
             System.out.println("Error fetching document: " + e.getMessage());
         }
-        return null;
+        return documents;
     }
 
     // Update

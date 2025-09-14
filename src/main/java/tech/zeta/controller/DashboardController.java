@@ -13,7 +13,10 @@ public class DashboardController {
         User currentUser = authService.getLoggedInUser();
 
         switch (currentUser.getRole()) {
-            //case ADMIN -> AdminUI.showAdminMenu();
+            case ADMIN -> {
+                AdminUI adminUI = new AdminUI();
+                adminUI.start();
+            }
             case CLIENT -> {
                 ClientUI clientUI = new ClientUI(authService);
                 clientUI.showMenu();

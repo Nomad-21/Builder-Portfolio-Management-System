@@ -45,13 +45,13 @@ public class ProjectRepository {
     }
 
     // Read
-    public <K,V> List<Project> getProjectBy(Param<K,V> params) {
+    public <K,V> List<Project> getProjectsBy(Param<K,V> params) {
         String sql = "SELECT * FROM Project WHERE " + params.getKey() + "=?";
         List<Project> projects = new ArrayList<>();
         try {Connection conn = DBUtil.getConnection();
              PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setObject(1, params.getValue());
-            System.out.println(statement);
+             statement.setObject(1, params.getValue());
+
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 projects.add(new Project(
@@ -155,5 +155,17 @@ public class ProjectRepository {
             System.out.println("Error fetching projects: " + e.getMessage());
         }
         return projects;
+    }
+
+    public void addProjectClient(int projectId, int clientId) {
+        String sql = "INSERT INTO Client_Project (client_id, project_id) VALUES (?, ?)";
+        try {Connection conn = DBUtil.getConnection();
+             PreparedStatement statement = conn.prepareStatement(sql);
+            statement.setInt(1, clientId);
+            statement.setInt(2, projectId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error associating project with client: " + e.getMessage());
+        }
     }
 }

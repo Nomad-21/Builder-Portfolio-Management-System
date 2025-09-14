@@ -1,5 +1,6 @@
 package tech.zeta.controller;
 
+import tech.zeta.constants.Role;
 import tech.zeta.model.User;
 import tech.zeta.service.AuthService;
 import tech.zeta.ui.AuthUI;
@@ -35,8 +36,7 @@ public class AuthController {
                     }
                 }
                 case 2 -> {
-                    authService.logout();
-                    authUI.showMessage("Logged out successfully!");
+                    authUI.showSignupForm(this);
                 }
                 case 3 -> {
                     authUI.showMessage("Exiting...");
@@ -45,5 +45,9 @@ public class AuthController {
                 default -> authUI.showMessage("Invalid choice!");
             }
         }
+    }
+
+    public boolean registerUser(String name, String email, String password, String role) {
+        return authService.registerUser(name, email, password, Role.valueOf(role));
     }
 }

@@ -2,10 +2,12 @@ package tech.zeta.repository;
 
 import tech.zeta.model.Task;
 import tech.zeta.util.DBUtil;
+import tech.zeta.util.Param;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SequencedCollection;
 
 public class TaskRepository {
 
@@ -27,27 +29,30 @@ public class TaskRepository {
     }
 
     // Read by ID
-    public Task getTaskById(int taskId) {
-        String sql = "SELECT * FROM Task WHERE task_id=?";
+    public <K,V> List<Task> getTasksBy(Param<K,V> param) {
+        String sql = "SELECT * FROM Task WHERE "+ param.getKey() +" =?";
+        List<Task> tasks = new ArrayList<>();
+
         try {Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, taskId);
+            stmt.setObject(1, param.getValue());
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return new Task(
-                        rs.getInt("task_id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getDate("start_date").toLocalDate(),
-                        rs.getDate("end_date").toLocalDate(),
-                        rs.getInt("progress"),
-                        rs.getInt("project_id")
+            while (rs.next()) {
+                tasks.add( new Task(
+                            rs.getInt("task_id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getDate("start_date").toLocalDate(),
+                            rs.getDate("end_date").toLocalDate(),
+                            rs.getInt("progress"),
+                            rs.getInt("project_id")
+                    )
                 );
             }
         } catch (SQLException e) {
             System.out.println("Error fetching task: " + e.getMessage());
         }
-        return null;
+        return tasks;
     }
 
     // Update
@@ -103,4 +108,6 @@ public class TaskRepository {
         }
         return tasks;
     }
+
+
 }
